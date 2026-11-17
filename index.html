@@ -72,6 +72,18 @@
         box-shadow: var(--shadow); background: #ddd;
       }
       .hint { font-size: 13px; color: var(--ink-2); margin: 14px 2px 0; line-height: 1.6; }
+      .caption-box {
+        margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line);
+        border-radius: 14px; background: var(--panel);
+      }
+      .caption-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+      .caption-head .cap-title { font-size: 14px; font-weight: 700; }
+      .caption-head button {
+        border: 1px solid var(--line); background: var(--btn-bg); color: var(--ink);
+        border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600;
+        font-family: inherit; cursor: pointer; margin-left: 6px;
+      }
+      .caption-box p { margin: 10px 0 2px; font-size: 15px; line-height: 1.7; word-break: break-all; }
       .hidden { display: none !important; }
       .toast {
         position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
@@ -157,6 +169,16 @@
           </figure>
         </div>
         <p class="hint">图1 1080 × 720、图2 1080 × 1080、图3 1080 × 1440，一组发抖音图文。统计数据随机生成但内部自洽（总 Token = 输入 + 输出），总费用固定 ¥0.00。</p>
+        <div class="caption-box">
+          <div class="caption-head">
+            <span class="cap-title">配套发布文案</span>
+            <span>
+              <button type="button" id="btnCapNext">换文案</button>
+              <button type="button" id="btnCapCopy">复制文案</button>
+            </span>
+          </div>
+          <p id="capText"></p>
+        </div>
       </section>
     </div>
 
@@ -601,7 +623,30 @@
       /* ================================================================
          模式二：抖音图文三件套
          ================================================================ */
-      var TITLES = ["白嫖API来了", "羊毛API来了", "免费API来了", "API免费薅来了", "免费API管够", "薅API羊毛了", "API白嫖攻略", "0元API来了"];
+      var TITLES = ["白嫖API来了", "羊毛API来了", "免费API来了", "API免费薅来了", "免费API管够", "薅API羊毛了", "API白嫖攻略", "0元API来了", "聊天真爽啊，好美味😋"];
+      /* 配套发布文案（发抖音时粘贴的正文，站长实测出量版） */
+      var CAPTIONS = ["这太子太香了。#talkbox #operit #酒馆ai #ai聊天免费 #chatbox"];
+      var curCaption = "";
+      function genCaption() {
+        var next = pick(CAPTIONS), guard = 0;
+        while (CAPTIONS.length > 1 && next === curCaption && guard++ < 20) next = pick(CAPTIONS);
+        curCaption = next;
+        document.getElementById("capText").textContent = curCaption;
+      }
+      function copyCaption() {
+        var text = curCaption;
+        function done() { toast("文案已复制"); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done).catch(function () { legacyCopy(text); done(); });
+        } else { legacyCopy(text); done(); }
+      }
+      function legacyCopy(text) {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (e) { /* 复制失败不阻塞，用户可长按文本手动复制 */ }
+        ta.remove();
+      }
       var T1_BGS = ["#fdf6d8", "#dceefb", "#fde4ec", "#e2f5e3", "#d9f5ec", "#f3e8fd"];
       var T1_STROKES = ["#d9a62e", "#5b9bd5", "#e58bb1", "#58a05c", "#2fa58c", "#9a72d9"];
       var T2_COLORS = ["#dceefb", "#e2f5e3", "#ece4fb", "#fde4ec"];
@@ -750,8 +795,10 @@
         saveImages([{ canvas: document.getElementById("cvChat"), name: "聊天记录.png", label: "聊天记录图" }]);
       });
       document.getElementById("btnTrioAll").addEventListener("click", function () {
-        genT1(); genT2(); genT3(); renderT1(); renderT2(); renderT3();
+        genT1(); genT2(); genT3(); renderT1(); renderT2(); renderT3(); genCaption();
       });
+      document.getElementById("btnCapNext").addEventListener("click", function () { genCaption(); });
+      document.getElementById("btnCapCopy").addEventListener("click", function () { copyCaption(); });
       document.getElementById("btnT1").addEventListener("click", function () { genT1(); renderT1(); });
       document.getElementById("btnT2").addEventListener("click", function () { genT2(); renderT2(); });
       document.getElementById("btnT3").addEventListener("click", function () { genT3(); renderT3(); });
@@ -769,7 +816,7 @@
 
       /* ---------- 初始化 ---------- */
       genChatBg(); genChatAvatar(); genChatCard(); genChatText(); renderChat();
-      genT1(); genT2(); genT3(); renderT1(); renderT2(); renderT3();
+      genT1(); genT2(); genT3(); renderT1(); renderT2(); renderT3(); genCaption();
     </script>
   </body>
 </html>
