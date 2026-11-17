@@ -84,6 +84,18 @@
         font-family: inherit; cursor: pointer; margin-left: 6px;
       }
       .caption-box p { margin: 10px 0 2px; font-size: 15px; line-height: 1.7; word-break: break-all; }
+      .cap-row { display: flex; align-items: flex-start; gap: 8px; }
+      .cap-label {
+        flex: 0 0 auto; margin-top: 2px; padding: 2px 8px; border-radius: 6px;
+        background: var(--btn-bg); border: 1px solid var(--line);
+        font-size: 12px; font-weight: 700; color: var(--ink-2);
+      }
+      .cap-row .cap-body { flex: 1 1 auto; }
+      .cap-mini {
+        flex: 0 0 auto; border: 1px solid var(--line); background: var(--btn-bg); color: var(--ink);
+        border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+        font-family: inherit; cursor: pointer;
+      }
       .hidden { display: none !important; }
       .toast {
         position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(20px);
@@ -143,6 +155,16 @@
           <canvas id="cvChat" width="1080" height="1440"></canvas>
         </div>
         <p class="hint">成图 1080 × 1440，微信聊天截图风。文案是群友分享口吻，价格卡是站内近 7 天平均扣费；换小图会连带换一组文案里的模型名。</p>
+        <div class="caption-box">
+          <div class="caption-head">
+            <span class="cap-title">配套标题与文案</span>
+            <span>
+              <button type="button" id="btnChatCapNext">换一套</button>
+            </span>
+          </div>
+          <p class="cap-row"><span class="cap-label">标题</span><span class="cap-body" id="chatTitleText"></span><button type="button" class="cap-mini" id="btnCopyChatTitle">复制</button></p>
+          <p class="cap-row"><span class="cap-label">文案</span><span class="cap-body" id="chatCapText"></span><button type="button" class="cap-mini" id="btnCopyChatCap">复制</button></p>
+        </div>
       </section>
 
       <!-- 模式二：抖音图文三件套 -->
@@ -649,12 +671,24 @@
         curCaption = next + " " + CAPTION_TAGS;
         document.getElementById("capText").textContent = curCaption;
       }
-      function copyCaption() {
-        var text = curCaption;
-        function done() { toast("文案已复制"); }
+      function copyText(text, msg) {
+        function done() { toast(msg); }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(done).catch(function () { legacyCopy(text); done(); });
         } else { legacyCopy(text); done(); }
+      }
+      function copyCaption() { copyText(curCaption, "文案已复制"); }
+      /* 聊天记录模式的配套标题＋文案（与三件套共用标题池/正文池/固定标签） */
+      var curChatTitle = "", curChatCap = "";
+      function genChatPromo() {
+        var t = pick(TITLES), guard = 0;
+        while (TITLES.length > 1 && t === curChatTitle && guard++ < 20) t = pick(TITLES);
+        curChatTitle = t;
+        document.getElementById("chatTitleText").textContent = t;
+        var lead = pick(CAPTION_LEADS); guard = 0;
+        while (CAPTION_LEADS.length > 1 && (lead + " " + CAPTION_TAGS) === curChatCap && guard++ < 20) lead = pick(CAPTION_LEADS);
+        curChatCap = lead + " " + CAPTION_TAGS;
+        document.getElementById("chatCapText").textContent = curChatCap;
       }
       function legacyCopy(text) {
         var ta = document.createElement("textarea");
@@ -801,8 +835,11 @@
 
       /* ---------- 按钮 ---------- */
       document.getElementById("btnAll").addEventListener("click", function () {
-        genChatBg(); genChatAvatar(); genChatCard(); genChatText(); renderChat();
+        genChatBg(); genChatAvatar(); genChatCard(); genChatText(); renderChat(); genChatPromo();
       });
+      document.getElementById("btnChatCapNext").addEventListener("click", function () { genChatPromo(); });
+      document.getElementById("btnCopyChatTitle").addEventListener("click", function () { copyText(curChatTitle, "标题已复制"); });
+      document.getElementById("btnCopyChatCap").addEventListener("click", function () { copyText(curChatCap, "文案已复制"); });
       document.getElementById("btnText").addEventListener("click", function () { genChatText(); renderChat(); });
       document.getElementById("btnAvatar").addEventListener("click", function () { genChatAvatar(); renderChat(); });
       document.getElementById("btnCard").addEventListener("click", function () { genChatCard(); genChatText(); renderChat(); });
@@ -831,7 +868,7 @@
       });
 
       /* ---------- 初始化 ---------- */
-      genChatBg(); genChatAvatar(); genChatCard(); genChatText(); renderChat();
+      genChatBg(); genChatAvatar(); genChatCard(); genChatText(); renderChat(); genChatPromo();
       genT1(); genT2(); genT3(); renderT1(); renderT2(); renderT3(); genCaption();
     </script>
   </body>
