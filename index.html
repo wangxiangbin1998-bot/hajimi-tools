@@ -249,9 +249,10 @@
          会静默忽略这种下载，toast 却照样报成功，用户只看到小字一闪、图没存下。
          现在改为：每次渲染完立刻预生成 PNG blob / File 并缓存（含 canShare
          预判），点保存时同步拿缓存调 share，中间不夹任何异步步骤。
-         路径一（支持文件分享，如 iOS Safari / Edge）：缓存 File → 系统分享
-           面板，点「存储图像」存进相册；share 成功 resolve 后才提示已保存。
-           canShare 预判不可用时也先直接试 share，失败才回退。
+         路径一（仅触屏设备，如 iOS Safari / 安卓浏览器）：缓存 File → 系统
+           分享面板，点「存储图像」存进相册；share 成功 resolve 后才提示已
+           保存。桌面浏览器即使支持文件分享也不走这条（2026-11-17 站长实测：
+           Windows 上点保存弹系统共享面板，不合用），一律走路径二。
          路径二（桌面浏览器）：缓存 blob + <a download> 直接下载，不弹窗。
          路径三（前两条都走不通，或手机上缓存未就绪）：保存面板长按裸图，
            提示文案如实写「长按图片保存」。 */
@@ -292,7 +293,7 @@
             try { files.push(new File([e.blob], it.name, { type: "image/png" })); } catch (err) { /* 缺文件则走兜底 */ }
           }
         });
-        if (items.length > 0 && files.length === items.length && navigator.share && (anyCan || isCoarsePointer())) {
+        if (items.length > 0 && files.length === items.length && navigator.share && isCoarsePointer()) {
           var p;
           try { p = navigator.share({ files: files }); }
           catch (e) { fallbackSave(items); return; }
