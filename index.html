@@ -623,14 +623,30 @@
       /* ================================================================
          模式二：抖音图文三件套
          ================================================================ */
-      var TITLES = ["白嫖API来了", "羊毛API来了", "免费API来了", "API免费薅来了", "免费API管够", "薅API羊毛了", "API白嫖攻略", "0元API来了", "聊天真爽啊，好美味😋"];
-      /* 配套发布文案（发抖音时粘贴的正文，站长实测出量版） */
-      var CAPTIONS = ["这太子太香了。#talkbox #operit #酒馆ai #ai聊天免费 #chatbox"];
+      var TITLES = ["白嫖API来了", "羊毛API来了", "免费API来了", "API免费薅来了", "免费API管够", "薅API羊毛了", "API白嫖攻略", "0元API来了", "聊天真爽啊，好美味😋",
+        "聊嗨了，根本停不下来", "这个AI也太会聊了", "聊了一晚上，太香了", "好上头，越聊越爽", "这聊天，香得嘞😋", "免费聊，聊到爽",
+        "AI陪聊，美味又过瘾", "今晚又聊嗨了", "这也太好聊了吧", "聊到不想睡，太爽了", "免费AI随便聊"];
+      /* 配套发布文案 = 多样化正文 + 固定话题标签（站长定：标签固定不变，只换正文） */
+      var CAPTION_TAGS = "#talkbox #operit #酒馆ai #ai聊天免费 #chatbox";
+      var CAPTION_LEADS = [
+        "这太子太香了。",
+        "聊起来根本停不下来，太上头了。",
+        "这个AI也太会聊了，香得嘞。",
+        "免费聊了一晚上，越聊越爽。",
+        "好美味😋 这聊天我能聊一整夜。",
+        "太好聊了，角色一个比一个香。",
+        "本来只想试试，结果聊嗨了。",
+        "这剧情走向，香迷糊了。",
+        "酒馆开聊，美味拉满😋",
+        "免费的快乐，聊到不想睡。",
+        "一聊就上头，这谁顶得住。",
+        "太香了太香了，根本戒不掉。"
+      ];
       var curCaption = "";
       function genCaption() {
-        var next = pick(CAPTIONS), guard = 0;
-        while (CAPTIONS.length > 1 && next === curCaption && guard++ < 20) next = pick(CAPTIONS);
-        curCaption = next;
+        var next = pick(CAPTION_LEADS), guard = 0;
+        while (CAPTION_LEADS.length > 1 && (next + " " + CAPTION_TAGS) === curCaption && guard++ < 20) next = pick(CAPTION_LEADS);
+        curCaption = next + " " + CAPTION_TAGS;
         document.getElementById("capText").textContent = curCaption;
       }
       function copyCaption() {
